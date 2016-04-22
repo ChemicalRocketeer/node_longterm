@@ -1,0 +1,19 @@
+{
+  "name": "longterm",
+  "version": "0.0.0",
+  "description": "A tool to schedule arbitrary events dynamically and persistently across multiple instances and restarts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chemicalrocketeer/node_longterm.git"
+  },
+  "author": "David Aaron Suddjian <aaron@digitalrocketry.com> (http://digitalrocketry.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chemicalrocketeer/node_longterm/issues"
+  },
+  "homepage": "https://github.com/chemicalrocketeer/node_longterm#readme"
+}
