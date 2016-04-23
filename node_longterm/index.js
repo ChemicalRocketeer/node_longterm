@@ -14,9 +14,9 @@ function init(options) {
 
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
-  if (!options.store) {
-    var MemoryStore = require('./MemoryStore');
-    options.store = new MemoryStore();
+  if (!options.queue) {
+    var MemoryQueue = require('./MemoryQueue');
+    options.queue = new MemoryQueue();
   }
   return options;
 }
