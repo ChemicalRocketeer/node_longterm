@@ -15,22 +15,22 @@ MemoryQueue.prototype.peek = function(callback) {
   callback(null, this._events[0]);
 };
 
-MemoryQueue.prototype.enqueue = function(time, type, data, callback) {
+MemoryQueue.prototype.enqueue = function(what, when, data, callback) {
   data = {
     id: this._currentId++,
-    type: type,
-    time: time,
+    what: what,
+    when: when,
     data: data
   };
   // TODO: use a more efficient data structure/algorithm for this operation
   this._events.push(data);
   this._events.sort(function(a, b) {
-    if (a.time < b.time) return -1;
-    if (a.time > b.time) return 1;
+    if (a.when < b.when) return -1;
+    if (a.when > b.when) return 1;
     return 0;
   });
   this._eventMap[data.id] = indexOfEvent(data.id, this._events);
-  callback(null, data.id);
+  callback(null, data);
 };
 
 MemoryQueue.prototype.remove = function(id, callback) {
@@ -41,6 +41,14 @@ MemoryQueue.prototype.remove = function(id, callback) {
   this._events.splice(index, 1);
   this._eventMap[id] = undefined;
   callback(null, 1);
+};
+
+MemoryQueue.prototype.find = function(id, callback) {
+  var index = this._eventMap[id];
+  if (typeof index === 'undefined') {
+    return callback(null, null);
+  }
+  callback(this._events[index]);
 };
 
 MemoryQueue.prototype.count = function(callback) {
