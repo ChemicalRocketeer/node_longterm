@@ -1,4 +1,4 @@
-var opts, store;
+var opts;
 
 function init(options) {
   opts = initializeOptions(options);
@@ -14,6 +14,10 @@ function init(options) {
 
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
+  if (!options.store) {
+    var MemoryStore = require('./MemoryStore');
+    options.store = new MemoryStore();
+  }
   return options;
 }
 
