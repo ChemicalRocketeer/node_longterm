@@ -32,7 +32,7 @@ proto.enqueue = function(what, when, data, callback) {
 
 proto.remove = function(id, callback) {
   var index = this._find(id);
-  if (index !== -1) {
+  if (index === -1) {
     return callback(null, 0);
   }
   this._events.splice(index, 1);
@@ -41,10 +41,10 @@ proto.remove = function(id, callback) {
 
 proto.find = function(id, callback) {
   var index = this._find(id);
-  if (index !== -1) {
+  if (index === -1) {
     return callback(null, null);
   }
-  callback(this._events[index]);
+  callback(null, this._events[index]);
 };
 
 proto.count = function(callback) {
