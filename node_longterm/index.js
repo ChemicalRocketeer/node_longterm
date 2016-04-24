@@ -47,8 +47,7 @@ function setTimer(event) {
   if (timer) {
     clearTimeout(timer.timeoutObj);
   }
-  console.log(event.when);
-  var delay = Date.now() - new Date(event.when);
+  var delay = new Date(event.when) - Date.now();
   timer = {
     timeoutObj: setTimeout(onTimerDone, delay, event),
     event: event
@@ -68,11 +67,9 @@ function onTimerDone(event) {
   }
   queue.remove(event.id, function(err, removed) {
     if (err) return fireError(err);
-    console.log(removed);
     queue.next(function(err, next) {
       if (err) return fireError(err); //TODO: add user error handling
       if (next) {
-        console.log(next);
         setTimer(next);
       }
     });
