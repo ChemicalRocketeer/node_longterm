@@ -3,6 +3,32 @@ var timer;
 var listenerMap = {};
 var errorHandlers = [];
 
+function init(options) {
+  initializeOptions(options);
+  return middleware;
+}
+
+function middleware(req, res, next) {
+  res.longterm = {
+    schedule: schedule
+  };
+  next();
+}
+
+function on(what, funk) {
+  if (typeof what === 'string' && typeof funk === 'function') {
+    listenerMap[what] = listenerMap[what] || [];
+    listenerMap[what].push(funk);
+  }
+  // allow chaining:   require('longterm').on(what, funk).on(what, funk)
+  return middleware;
+}
+
+function error(funk) {
+  if (typeof funk === 'function') errorHandlers.push(funk);
+  return middleware;
+}
+
 function schedule(what, when, data, callback) {
   queue.enqueue(what, when, data, function(err, event) {
     if (err) {
@@ -50,20 +76,6 @@ function onTimerDone(event) {
   });
 }
 
-function on(what, funk) {
-  if (typeof what === 'string' && typeof funk === 'function') {
-    listenerMap[what] = listenerMap[what] || [];
-    listenerMap[what].push(funk);
-  }
-  // allow chaining:   require('longterm').on(what, funk).on(what, funk)
-  return middleware;
-}
-
-function error(funk) {
-  if (typeof funk === 'function') errorHandlers.push(funk);
-  return middleware;
-}
-
 function fireError(err) {
   for (var i = 0; i < errorHandlers.length; i++) {
     process.nextTick(errorHandlers[i], err);
@@ -96,18 +108,6 @@ function initializeOptions(options) {
     error(options.error);
   }
   return options;
-}
-
-function middleware(req, res, next) {
-  res.longterm = {
-    schedule: schedule
-  };
-  next();
-}
-
-function init(options) {
-  initializeOptions(options);
-  return middleware;
 }
 
 // allow chaining:   require('longterm').on(what, funk).error(funk)
