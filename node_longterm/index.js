@@ -1,6 +1,7 @@
 var queue;
 var timer;
 var listenerMap = {};
+var errorHandlers = [];
 
 function schedule(what, when, data, callback) {
   queue.enqueue(what, when, data, function(err, event) {
@@ -39,9 +40,9 @@ function onTimerDone(event) {
     }
   }
   queue.remove(event.id, function(err) {
-    if (err) console.error(err);
+    if (err) return fireError(err);
     queue.next(function(err, next) {
-      if (err) console.error(err); //TODO: add user error handling
+      if (err) return fireError(err); //TODO: add user error handling
       if (next) {
         setTimer(next);
       }
@@ -58,6 +59,17 @@ function on(what, funk) {
   return middleware;
 }
 
+function error(funk) {
+  if (typeof funk === 'function') errorHandlers.push(funk);
+  return middleware;
+}
+
+function fireError(err) {
+  for (var i = 0; i < errorHandlers.length; i++) {
+    process.nextTick(errorHandlers[i], err);
+  }
+}
+
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
   if (!options.queue) {
@@ -65,12 +77,23 @@ function initializeOptions(options) {
     var MemoryQueue = require('./MemoryQueue');
     queue = options.queue = new MemoryQueue();
   }
+  // find all the functions in the 'on' variable, and apply them with the 'on' function
   if (options.on) {
     for (var what in options.on) {
       if (options.on.hasOwnProperty(what)) {
         on(what, options.on[what]);
       }
     }
+  }
+  if (Array.isArray(options.error)) {
+    for (var i = 0; i < options.error.length; i++) {
+      var handler = options.error[i];
+      if (typeof handler === 'function') {
+        error(handler);
+      }
+    }
+  } else if (typeof options.error === 'function') {
+    error(options.error);
   }
   return options;
 }
@@ -87,7 +110,8 @@ function init(options) {
   return middleware;
 }
 
-// allow chaining:   require('longterm').on(what, funk)
+// allow chaining:   require('longterm').on(what, funk).error(funk)
 init.on = middleware.on = on;
+init.error = middleware.error = error;
 
 module.exports = init;
