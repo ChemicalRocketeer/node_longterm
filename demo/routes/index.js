@@ -7,8 +7,9 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/longterm', function(req, res, next) {
-  console.log('longterm');
-  res.longterm();
+  res.longterm.schedule('test', Date.now() + 10000, { message: 'hello longterm!' }, function(err, eventId) {
+    res.send(eventId);
+  });
 });
 
 module.exports = router;

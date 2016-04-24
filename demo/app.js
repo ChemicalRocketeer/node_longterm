@@ -24,6 +24,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(longterm());
 
+longterm.on('test', function(event) {
+  console.log(event.message);
+});
+
 app.use('/', routes);
 app.use('/users', users);
 
