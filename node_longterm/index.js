@@ -28,6 +28,7 @@ function middleware(req, res, next) {
 }
 
 function longterm(what, when, data, callback) {
+  if (!queue) queue = new MemoryQueue();
   queue.enqueue(what, when, data, function(err, event) {
     if (err) {
       if (typeof callback === 'function') callback(err);
