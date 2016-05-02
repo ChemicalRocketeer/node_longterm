@@ -9,10 +9,8 @@ Define your event types and response functions on app startup, and then you can 
 ### longterm
 The primary export of longterm.js is the longterm function, which allows you to schedule events.
 
-#### signature
 `longterm(what, when, data[, callback])`
 
-#### example
 ```
 var longterm = require('longterm');
 longterm('party', Date.now() + 10000, {
