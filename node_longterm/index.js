@@ -23,11 +23,11 @@ function error(funk) {
 }
 
 function middleware(req, res, next) {
-  res.longterm = schedule;
+  res.longterm = longterm;
   next();
 }
 
-function schedule(what, when, data, callback) {
+function longterm(what, when, data, callback) {
   queue.enqueue(what, when, data, function(err, event) {
     if (err) {
       if (typeof callback === 'function') callback(err);
@@ -110,8 +110,8 @@ function initializeOptions(options) {
 
 // set up the variables for ease of use in the api
 // allow chaining:   require('longterm').on(what, funk).error(funk)
-schedule.on = middleware.on = on;
-schedule.error = middleware.error = error;
-schedule.init = init;
+longterm.on = middleware.on = on;
+longterm.error = middleware.error = error;
+longterm.init = init;
 
-module.exports = schedule;
+module.exports = longterm;
