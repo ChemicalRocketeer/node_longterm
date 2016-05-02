@@ -23,9 +23,7 @@ function error(funk) {
 }
 
 function middleware(req, res, next) {
-  res.longterm = {
-    schedule: schedule
-  };
+  res.longterm = schedule;
   next();
 }
 
