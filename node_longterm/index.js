@@ -8,13 +8,6 @@ function init(options) {
   return middleware;
 }
 
-function middleware(req, res, next) {
-  res.longterm = {
-    schedule: schedule
-  };
-  next();
-}
-
 function on(what, funk) {
   if (typeof what === 'string' && typeof funk === 'function') {
     listenerMap[what] = listenerMap[what] || [];
@@ -27,6 +20,13 @@ function on(what, funk) {
 function error(funk) {
   if (typeof funk === 'function') errorHandlers.push(funk);
   return middleware;
+}
+
+function middleware(req, res, next) {
+  res.longterm = {
+    schedule: schedule
+  };
+  next();
 }
 
 function schedule(what, when, data, callback) {
@@ -110,8 +110,10 @@ function initializeOptions(options) {
   return options;
 }
 
+// set up the variables for ease of use in the api
 // allow chaining:   require('longterm').on(what, funk).error(funk)
-init.on = middleware.on = on;
-init.error = middleware.error = error;
+schedule.on = middleware.on = on;
+schedule.error = middleware.error = error;
+schedule.init = init;
 
-module.exports = init;
+module.exports = schedule;

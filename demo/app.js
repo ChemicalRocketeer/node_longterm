@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(longterm());
+app.use(longterm.init());
 
 longterm.on('test', function(event) {
   console.log(event.message);
