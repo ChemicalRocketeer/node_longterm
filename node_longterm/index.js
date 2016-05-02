@@ -68,7 +68,7 @@ function onTimerDone(event) {
   queue.remove(event.id, function(err, removed) {
     if (err) return fireError(err);
     queue.next(function(err, next) {
-      if (err) return fireError(err); //TODO: add user error handling
+      if (err) return fireError(err);
       if (next) {
         setTimer(next);
       }
