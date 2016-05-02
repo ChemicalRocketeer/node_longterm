@@ -38,6 +38,7 @@ function longterm(what, when, data, callback) {
     }
     if (typeof callback === 'function') callback(null, event.id);
   });
+  return longterm;
 }
 
 // sets the timer to wait for the given event
