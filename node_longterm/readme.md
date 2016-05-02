@@ -18,9 +18,9 @@ var longterm = require('longterm');
 longterm('party', Date.now() + 10000, {
   inviteList: [
     'Aaron',
+    'Christy',
     'Aji',
-    'Jake',
-    'Kyle'
+    'Nancy'
   ]
 });
 ```
