@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/chemicalrocketeer/node_longterm/issues"
   },
-  "homepage": "https://github.com/chemicalrocketeer/node_longterm#readme"
+  "homepage": "https://github.com/chemicalrocketeer/node_longterm#readme",
+  "dependencies": {
+    "mocha": "^2.4.5"
+  }
 }
