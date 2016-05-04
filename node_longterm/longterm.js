@@ -34,8 +34,8 @@ function longterm(what, when, data, callback) {
       if (typeof callback === 'function') callback(err);
       return;
     }
-    if (!timer || event.when <= Date.now()) {
-      setTimer(event); // TODO: pull the latest event off the queue instead, to maintain event order in edge cases of multiple events at the same time
+    if (!timer || event.when <= timer.event.when) {
+      setTimer(event);
     }
     if (typeof callback === 'function') callback(null, event.id);
   });
