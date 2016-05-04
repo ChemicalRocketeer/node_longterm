@@ -77,6 +77,9 @@ function onTimerDone(event) {
 }
 
 function fireError(err) {
+  if (errorHandlers.length === 0) {
+    process.nextTick(console.error, err);
+  }
   for (var i = 0; i < errorHandlers.length; i++) {
     process.nextTick(errorHandlers[i], err);
   }
