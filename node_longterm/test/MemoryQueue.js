@@ -53,6 +53,7 @@ describe('MemoryQueue', function() {
     });
 
     it('should find an event if there is one', function(done) {
+      var now = Date.now();
       queue.enqueue('a', now, {data: 'dat'}, function(err, item) {
         queue.next(function(err, item) {
           expect(item).to.exist;
