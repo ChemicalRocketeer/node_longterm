@@ -14,11 +14,11 @@ describe('MemoryQueue', function() {
     }
   }
 
-  var asyncWhat = function(expected, remove) {
+  var asyncNext = function(expected, remove) {
     return function(callback) {
       queue.next(function(err, item) {
         assert.equal(expected, item.what);
-        if (item) {
+        if (item && remove) {
           queue.remove(item.id, function() {
             process.nextTick(callback);
           })
@@ -26,12 +26,6 @@ describe('MemoryQueue', function() {
           process.nextTick(callback);
         }
       });
-    }
-  }
-
-  var asyncRemove = function(id) {
-    return function(callback) {
-      queue.remove(id);
     }
   }
 
@@ -60,7 +54,7 @@ describe('MemoryQueue', function() {
     it('should return an event if there is one', function(done) {
       async.series([
         asyncEnq('a', Date.now(), {data: 'data'}),
-        asyncWhat('a')
+        asyncNext('a')
       ], done);
     });
 
@@ -78,10 +72,10 @@ describe('MemoryQueue', function() {
         asyncEnq('b', now + 2000, {data: 2}),
         asyncEnq('d', now + 10000, {data: 4}),
         asyncEnq('a', now, {data: 1}),
-        asyncWhat('a'),
-        asyncWhat('b'),
-        asyncWhat('c'),
-        asyncWhat('d')
+        asyncNext('a'),
+        asyncNext('b'),
+        asyncNext('c'),
+        asyncNext('d')
       ], done);
     });
   });
