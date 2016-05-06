@@ -18,5 +18,10 @@
   "homepage": "https://github.com/chemicalrocketeer/node_longterm#readme",
   "dependencies": {
     "mocha": "^2.4.5"
+  },
+  "devDependencies": {
+    "async": "^2.0.0-rc.4",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
   }
 }
