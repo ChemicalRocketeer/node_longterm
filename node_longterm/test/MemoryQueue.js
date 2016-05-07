@@ -17,7 +17,9 @@ describe('MemoryQueue', function() {
   var asyncNext = function(expected, remove) {
     return function(callback) {
       queue.next(function(err, item) {
-        assert.equal(expected, item.what);
+        expect(item).to.exist;
+        expect(item).to.have.all.keys('id', 'what', 'when', 'data');
+        expect(item.what).to.equal(expected);
         if (item && remove) {
           queue.remove(item.id, function() {
             process.nextTick(callback);
@@ -85,4 +87,28 @@ describe('MemoryQueue', function() {
       ], done);
     });
   });
+
+  describe('remove', function() {
+    beforeEach(function(done) {
+      queue = new MemoryQueue();
+      done();
+    });
+
+    it('should remove the correct item', function(done){
+      var now = Date.now();
+      async.series([
+        asyncEnq('a', now, {a: 'a'}),
+        asyncEnq('b', now + 100, {b: 'b'}),
+        asyncEnq('c', now + 1000, {c: 'c'}),
+      ], function(err, results) {
+        queue.remove(results[1].id, function(err, count) {
+          expect(count).to.equal(1);
+          queue.find(results[1].id, function(err, item) {
+            expect(item).not.to.exist;
+            done();
+          });
+        });
+      });
+    });
+  })
 });
