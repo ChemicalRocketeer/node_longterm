@@ -23,9 +23,7 @@ proto.enqueue = function(what, when, data, callback) {
   // TODO: use a more efficient data structure/algorithm for this operation
   this._events.push(data);
   this._events.sort(function(a, b) {
-    if (a.when < b.when) return -1;
-    if (a.when > b.when) return 1;
-    return 0;
+    return a.when - b.when;
   });
   callback(null, data);
 };
