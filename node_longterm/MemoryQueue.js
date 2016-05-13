@@ -32,9 +32,10 @@ proto.remove = function(id, callback) {
   var index = this._find(id);
   if (index === -1) {
     return callback(null, 0);
+  } else {
+    this._events.splice(index, 1);
+    callback(null, 1);
   }
-  this._events.splice(index, 1);
-  callback(null, 1);
 };
 
 proto.find = function(id, callback) {
