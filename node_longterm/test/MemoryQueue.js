@@ -1,6 +1,5 @@
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 var async = require('async');
 var MemoryQueue = require('../MemoryQueue');
 
@@ -68,7 +67,7 @@ describe('MemoryQueue', function() {
 
     it('should return null if there are no events', function(done) {
       queue.next(function(err, item) {
-        assert.equal(null, item);
+        expect(item).to.be.null;
         done();
       });
     });
