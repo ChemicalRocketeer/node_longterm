@@ -57,12 +57,10 @@ function setTimer(event) {
 // trigger the event and look for the next one
 function onTimerDone(event) {
   timer = null;
-  if (event) {
-    var listeners = listenerMap[event.what];
-    if (listeners) {
-      for (var i = 0; i < listeners.length; i++) {
-        process.nextTick(listeners[i], event.data);
-      }
+  var listeners = listenerMap[event.what];
+  if (listeners) {
+    for (var i = 0; i < listeners.length; i++) {
+      process.nextTick(listeners[i], event.data);
     }
   }
   queue.remove(event.id, function(err, removed) {
