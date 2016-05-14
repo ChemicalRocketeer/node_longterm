@@ -13,23 +13,6 @@ describe('MemoryQueue', function() {
     }
   }
 
-  var asyncNext = function(expected, remove) {
-    return function(callback) {
-      queue.next(function(err, item) {
-        expect(item).to.exist;
-        expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-        expect(item.what).to.equal(expected);
-        if (item && remove) {
-          queue.remove(item.id, function() {
-            process.nextTick(callback);
-          })
-        } else {
-          process.nextTick(callback);
-        }
-      });
-    }
-  }
-
   describe('enqueue', function() {
     beforeEach(function(done) {
       queue = new MemoryQueue();
@@ -52,6 +35,23 @@ describe('MemoryQueue', function() {
       queue = new MemoryQueue();
       done();
     });
+
+    var asyncNext = function(expected, remove) {
+      return function(callback) {
+        queue.next(function(err, item) {
+          expect(item).to.exist;
+          expect(item).to.have.all.keys('id', 'what', 'when', 'data');
+          expect(item.what).to.equal(expected);
+          if (item && remove) {
+            queue.remove(item.id, function() {
+              process.nextTick(callback);
+            })
+          } else {
+            process.nextTick(callback);
+          }
+        });
+      }
+    }
 
     it('should find an event if there is one', function(done) {
       var now = Date.now();
