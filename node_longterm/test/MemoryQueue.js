@@ -30,15 +30,15 @@ describe('MemoryQueue', function() {
     })
   })
 
-  describe('next', function() {
+  describe('peek', function() {
     beforeEach(function(done) {
       queue = new MemoryQueue();
       done();
     });
 
-    var asyncNext = function(expected, remove) {
+    var asyncPeek = function(expected, remove) {
       return function(callback) {
-        queue.next(function(err, item) {
+        queue.peek(function(err, item) {
           expect(item).to.exist;
           expect(item).to.have.all.keys('id', 'what', 'when', 'data');
           expect(item.what).to.equal(expected);
@@ -56,7 +56,7 @@ describe('MemoryQueue', function() {
     it('should find an event if there is one', function(done) {
       var now = Date.now();
       queue.enqueue('a', now, {data: 'dat'}, function(err, item) {
-        queue.next(function(err, item) {
+        queue.peek(function(err, item) {
           expect(item).to.exist;
           expect(item).to.have.all.keys('id', 'what', 'when', 'data');
           expect(item).to.contain.all.keys({what: 'name', when: now, data: {data: 'x'}});
@@ -66,7 +66,7 @@ describe('MemoryQueue', function() {
     });
 
     it('should return null if there are no events', function(done) {
-      queue.next(function(err, item) {
+      queue.peek(function(err, item) {
         expect(item).to.be.null;
         done();
       });
@@ -79,10 +79,10 @@ describe('MemoryQueue', function() {
         asyncEnq('b', now + 2000, {data: 2}),
         asyncEnq('d', now + 10000, {data: 4}),
         asyncEnq('a', now, {data: 1}),
-        asyncNext('a', true),
-        asyncNext('b', true),
-        asyncNext('c', true),
-        asyncNext('d', true)
+        asyncPeek('a', true),
+        asyncPeek('b', true),
+        asyncPeek('c', true),
+        asyncPeek('d', true)
       ], done);
     });
   });
@@ -219,7 +219,7 @@ describe('MemoryQueue', function() {
       ], function(err, results) {
         queue.clear(function(err, count) {
           expect(count).to.equal(3);
-          queue.next(function(err, item) {
+          queue.peek(function(err, item) {
             expect(item).to.not.exist;
             queue.count(function(err, count) {
               expect(count).to.equal(0);
@@ -233,7 +233,7 @@ describe('MemoryQueue', function() {
     it('should do nothing with an empty queue', function(done) {
       queue.clear(function(err, count) {
         expect(count).to.equal(0);
-        queue.next(function(err, item) {
+        queue.peek(function(err, item) {
           expect(item).to.not.exist;
           queue.count(function(err, count) {
             expect(count).to.equal(0);

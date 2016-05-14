@@ -5,7 +5,7 @@ function MemoryQueue(options) {
 
 var proto = MemoryQueue.prototype;
 
-proto.next = function(callback) {
+proto.peek = function(callback) {
   if (this._events.length > 0) {
     callback(null, this._events[0]);
   } else {
@@ -27,6 +27,16 @@ proto.enqueue = function(what, when, data, callback) {
   });
   callback(null, data);
 };
+
+proto.update = function(id, data, callback) {
+  var index = this._find(id);
+  if (index === -1) {
+    return callback(null, null);
+  } else {
+    this._events[index].data = data;
+    return callback(this._events[index]);
+  }
+}
 
 proto.remove = function(id, callback) {
   var index = this._find(id);
