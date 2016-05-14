@@ -34,7 +34,7 @@ proto.update = function(id, data, callback) {
     return callback(null, null);
   } else {
     this._events[index].data = data;
-    return callback(this._events[index]);
+    return callback(null, this._events[index]);
   }
 }
 

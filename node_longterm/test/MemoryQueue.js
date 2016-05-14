@@ -24,7 +24,10 @@ describe('MemoryQueue', function() {
       queue.enqueue('a', now, {data: 'x'}, function(err, item) {
         expect(item).to.exist;
         expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-        expect(item).to.contain.all.keys({what: 'name', when: now, data: {data: 'x'}});
+        expect(item).to.have.property('what', 'a');
+        expect(item).to.have.property('data')
+          .that.is.an('object')
+          .that.deep.equals({data: 'x'});
         done();
       });
     })
@@ -59,7 +62,10 @@ describe('MemoryQueue', function() {
         queue.peek(function(err, item) {
           expect(item).to.exist;
           expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-          expect(item).to.contain.all.keys({what: 'name', when: now, data: {data: 'x'}});
+          expect(item).to.have.property('what', 'a');
+          expect(item).to.have.property('data')
+            .that.is.an('object')
+            .that.deep.equals({data: 'dat'});
           done();
         })
       });
@@ -84,6 +90,50 @@ describe('MemoryQueue', function() {
         asyncPeek('c', true),
         asyncPeek('d', true)
       ], done);
+    });
+  });
+
+  describe('update', function() {
+    beforeEach(function(done) {
+      queue = new MemoryQueue();
+      done();
+    });
+
+    it('should change the event persistently', function(done) {
+      queue.enqueue('a', Date.now(), {data: 'foo'}, function(err, item) {
+        queue.update(item.id, {change: 'bar'}, function(err, item) {
+          queue.find(item.id, function(err, item) {
+            expect(item).to.exist;
+            expect(item).to.have.all.keys('id', 'what', 'when', 'data');
+            expect(item).to.have.property('what', 'a');
+            expect(item).to.have.property('data')
+              .that.is.an('object')
+              .that.deep.equals({change: 'bar'});
+            done();
+          });
+        });
+      });
+    });
+
+    it('should return the modified event', function(done) {
+      queue.enqueue('a', Date.now(), {data: 'foo'}, function(err, item) {
+        queue.update(item.id, {change: 'bar'}, function(err, item) {
+          expect(item).to.exist;
+          expect(item).to.have.all.keys('id', 'what', 'when', 'data');
+          expect(item).to.have.property('what', 'a');
+          expect(item).to.have.property('data')
+            .that.is.an('object')
+            .that.deep.equals({change: 'bar'});
+          done();
+        });
+      });
+    });
+
+    it('should return null if the event does not exist', function(done) {
+      queue.update('nope', {data: 'oh the huge manatee'}, function(err, item) {
+        expect(item).to.be.null;
+        done();
+      });
     });
   });
 
