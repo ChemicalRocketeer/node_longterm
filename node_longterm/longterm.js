@@ -45,16 +45,14 @@ function longterm(what, when, data, callback) {
   return longterm;
 }
 
-// sets the timer to wait for the given event
-function setTimer(event) {
-  if (timer) {
-    clearTimeout(timer.timeoutObj);
-  }
-  var delay = new Date(event.when) - Date.now();
-  timer = {
-    timeoutObj: setTimeout(onTimerDone, delay, event),
-    event: event
-  };
+function cancel(eventId, callback) {
+  if (!queue) queue = new MemoryQueue();
+  queue.remove(eventId.toString(), function(err, count) {
+    if (err) return fireError(err);
+    if (timer && timer.event.id == eventId) {
+      findNextEvent();
+    }
+  });
 }
 
 // trigger the event and look for the next one
@@ -70,13 +68,29 @@ function onTimerDone(event) {
   }
   queue.remove(event.id, function(err, removed) {
     if (err) return fireError(err);
-    queue.peek(function(err, next) {
-      if (err) return fireError(err);
-      if (next) {
-        setTimer(next);
-      }
-    });
+    findNextEvent();
   });
+}
+
+function findNextEvent() {
+  queue.peek(function(err, next) {
+    if (err) return fireError(err);
+    if (next) {
+      setTimer(next);
+    }
+  });
+}
+
+// sets the timer to wait for the given event
+function setTimer(event) {
+  if (timer) {
+    clearTimeout(timer.timeoutObj);
+  }
+  var delay = new Date(event.when) - Date.now();
+  timer = {
+    timeoutObj: setTimeout(onTimerDone, delay, event),
+    event: event
+  };
 }
 
 function fireError(err) {
