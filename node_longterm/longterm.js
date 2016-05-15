@@ -29,7 +29,7 @@ function middleware(req, res, next) {
 
 function longterm(what, when, data, callback) {
   if (!queue) queue = new MemoryQueue();
-  if (!listenerMap.what || !listenerMap.what.length) {
+  if (!listenerMap[what] || !listenerMap[what].length) {
     fireError('event ' + what + ' has no handlers. Make sure you define event handlers!');
   }
   queue.enqueue(when, {what: what, data: data}, function(err, event) {
