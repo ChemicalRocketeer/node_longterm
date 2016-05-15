@@ -29,7 +29,7 @@ function middleware(req, res, next) {
 
 function longterm(what, when, data, callback) {
   if (!queue) queue = new MemoryQueue();
-  queue.enqueue(what, when, data, function(err, event) {
+  queue.enqueue(when, {what: what, data: data}, function(err, event) {
     if (err) {
       if (typeof callback === 'function') callback(err);
       return;
@@ -57,10 +57,10 @@ function setTimer(event) {
 // trigger the event and look for the next one
 function onTimerDone(event) {
   timer = null;
-  var listeners = listenerMap[event.what];
+  var listeners = listenerMap[event.data.what];
   if (listeners) {
     for (var i = 0; i < listeners.length; i++) {
-      process.nextTick(listeners[i], event.data);
+      process.nextTick(listeners[i], event.data.data);
     }
   }
   queue.remove(event.id, function(err, removed) {

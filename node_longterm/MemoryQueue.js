@@ -13,19 +13,18 @@ proto.peek = function(callback) {
   }
 };
 
-proto.enqueue = function(what, when, data, callback) {
-  data = {
+proto.enqueue = function(when, data, callback) {
+  var event = {
     id: this._currentId++,
-    what: what,
     when: when,
     data: data
   };
   // TODO: use a more efficient data structure/algorithm for this operation
-  this._events.push(data);
+  this._events.push(event);
   this._events.sort(function(a, b) {
     return a.when - b.when;
   });
-  callback(null, data);
+  callback(null, event);
 };
 
 proto.update = function(id, data, callback) {

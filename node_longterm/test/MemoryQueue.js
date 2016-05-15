@@ -7,9 +7,9 @@ describe('MemoryQueue', function() {
 
   var queue;
 
-  var asyncEnq = function(what, when, data) {
+  var asyncEnq = function(when, data) {
     return function(callback) {
-      queue.enqueue(what, when, data, callback);
+      queue.enqueue(when, data, callback);
     }
   }
 
@@ -21,13 +21,10 @@ describe('MemoryQueue', function() {
 
     it('should return the event information', function(done) {
       var now = Date.now();
-      queue.enqueue('a', now, {data: 'x'}, function(err, item) {
+      queue.enqueue(now, {data: 'x'}, function(err, item) {
         expect(item).to.exist;
-        expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-        expect(item).to.have.property('what', 'a');
-        expect(item).to.have.property('data')
-          .that.is.an('object')
-          .that.deep.equals({data: 'x'});
+        expect(item).to.have.all.keys('id', 'when', 'data');
+        expect(item.data).to.deep.equal({data: 'x'});
         done();
       });
     })
@@ -43,8 +40,8 @@ describe('MemoryQueue', function() {
       return function(callback) {
         queue.peek(function(err, item) {
           expect(item).to.exist;
-          expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-          expect(item.what).to.equal(expected);
+          expect(item).to.have.all.keys('id', 'when', 'data');
+          expect(item.data).to.deep.equal(expected);
           if (item && remove) {
             queue.remove(item.id, function() {
               process.nextTick(callback);
@@ -58,14 +55,11 @@ describe('MemoryQueue', function() {
 
     it('should find an event if there is one', function(done) {
       var now = Date.now();
-      queue.enqueue('a', now, {data: 'dat'}, function(err, item) {
+      queue.enqueue(now, {data: 'dat'}, function(err, item) {
         queue.peek(function(err, item) {
           expect(item).to.exist;
-          expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-          expect(item).to.have.property('what', 'a');
-          expect(item).to.have.property('data')
-            .that.is.an('object')
-            .that.deep.equals({data: 'dat'});
+          expect(item).to.have.all.keys('id', 'when', 'data');
+          expect(item.data).to.deep.equal({data: 'dat'});
           done();
         })
       });
@@ -81,14 +75,14 @@ describe('MemoryQueue', function() {
     it('should retrieve events in temporal order despite insertion order', function(done) {
       var now = Date.now();
       async.series([
-        asyncEnq('c', now + 4000, {data: 3}),
-        asyncEnq('b', now + 2000, {data: 2}),
-        asyncEnq('d', now + 10000, {data: 4}),
-        asyncEnq('a', now, {data: 1}),
-        asyncPeek('a', true),
-        asyncPeek('b', true),
-        asyncPeek('c', true),
-        asyncPeek('d', true)
+        asyncEnq(now + 4000, {data: 3}),
+        asyncEnq(now + 2000, {data: 2}),
+        asyncEnq(now + 10000, {data: 4}),
+        asyncEnq(now, {data: 1}),
+        asyncPeek({data: 1}, true),
+        asyncPeek({data: 2}, true),
+        asyncPeek({data: 3}, true),
+        asyncPeek({data: 4}, true)
       ], done);
     });
   });
@@ -100,15 +94,12 @@ describe('MemoryQueue', function() {
     });
 
     it('should change the event persistently', function(done) {
-      queue.enqueue('a', Date.now(), {data: 'foo'}, function(err, item) {
+      queue.enqueue(Date.now(), {data: 'foo'}, function(err, item) {
         queue.update(item.id, {change: 'bar'}, function(err, item) {
           queue.find(item.id, function(err, item) {
             expect(item).to.exist;
-            expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-            expect(item).to.have.property('what', 'a');
-            expect(item).to.have.property('data')
-              .that.is.an('object')
-              .that.deep.equals({change: 'bar'});
+            expect(item).to.have.all.keys('id', 'when', 'data');
+            expect(item.data).to.deep.equal({change: 'bar'});
             done();
           });
         });
@@ -116,14 +107,11 @@ describe('MemoryQueue', function() {
     });
 
     it('should return the modified event', function(done) {
-      queue.enqueue('a', Date.now(), {data: 'foo'}, function(err, item) {
+      queue.enqueue(Date.now(), {data: 'foo'}, function(err, item) {
         queue.update(item.id, {change: 'bar'}, function(err, item) {
           expect(item).to.exist;
-          expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-          expect(item).to.have.property('what', 'a');
-          expect(item).to.have.property('data')
-            .that.is.an('object')
-            .that.deep.equals({change: 'bar'});
+          expect(item).to.have.all.keys('id', 'when', 'data');
+          expect(item.data).to.deep.equal({change: 'bar'});
           done();
         });
       });
@@ -146,9 +134,9 @@ describe('MemoryQueue', function() {
     it('should remove the correct item', function(done){
       var now = Date.now();
       async.series([
-        asyncEnq('a', now, {a: 'a'}),
-        asyncEnq('b', now + 100, {b: 'b'}),
-        asyncEnq('c', now + 1000, {c: 'c'}),
+        asyncEnq(now, {a: 'a'}),
+        asyncEnq(now + 100, {b: 'b'}),
+        asyncEnq(now + 1000, {c: 'c'}),
       ], function(err, results) {
         queue.remove(results[1].id, function(err, count) {
           expect(count).to.equal(1);
@@ -163,9 +151,9 @@ describe('MemoryQueue', function() {
     it('should do nothing if the item does not exist', function(done){
       var now = Date.now();
       async.series([
-        asyncEnq('a', now, {a: 'a'}),
-        asyncEnq('b', now + 100, {b: 'b'}),
-        asyncEnq('c', now + 1000, {c: 'c'}),
+        asyncEnq(now, {a: 'a'}),
+        asyncEnq(now + 100, {b: 'b'}),
+        asyncEnq(now + 1000, {c: 'c'}),
       ], function(err, results) {
         queue.remove(-474395657, function(err, count) {
           expect(count).to.equal(0);
@@ -196,21 +184,21 @@ describe('MemoryQueue', function() {
     it('should find the correct item', function(done){
       var now = Date.now();
       async.series([
-        asyncEnq('a', now, {a: 'a'}),
-        asyncEnq('b', now + 100, {b: 'b'}),
-        asyncEnq('c', now + 1000, {c: 'c'}),
+        asyncEnq(now, {a: 'a'}),
+        asyncEnq(now + 100, {b: 'b'}),
+        asyncEnq(now + 1000, {c: 'c'}),
       ], function(err, results) {
         queue.find(results[1].id, function(err, item) {
           expect(item).to.exist;
-          expect(item).to.have.all.keys('id', 'what', 'when', 'data');
-          expect(item.what).to.equal('b');
+          expect(item).to.have.all.keys('id', 'when', 'data');
+          expect(item.data).to.deep.equal({b: 'b'});
           done();
         });
       });
     });
 
     it('should send null if the item does not exist', function(done){
-      queue.enqueue('a', Date.now(), {data: 'dat'}, function(err, item) {
+      queue.enqueue(Date.now(), {data: 'dat'}, function(err, item) {
         queue.find(-893623618, function(err, item) {
           expect(item).to.be.null;
           done();
@@ -235,9 +223,9 @@ describe('MemoryQueue', function() {
     it('should return the correct number', function(done) {
       var now = Date.now();
       async.series([
-        asyncEnq('a', now, {a: 'a'}),
-        asyncEnq('b', now + 100, {b: 'b'}),
-        asyncEnq('c', now + 1000, {c: 'c'}),
+        asyncEnq(now, {a: 'a'}),
+        asyncEnq(now + 100, {b: 'b'}),
+        asyncEnq(now + 1000, {c: 'c'}),
       ], function(err, results) {
         queue.count(function(err, count) {
           expect(count).to.equal(3);
@@ -263,9 +251,9 @@ describe('MemoryQueue', function() {
     it('should clear the queue', function(done) {
       var now = Date.now();
       async.series([
-        asyncEnq('a', now, {a: 'a'}),
-        asyncEnq('b', now + 100, {b: 'b'}),
-        asyncEnq('c', now + 1000, {c: 'c'}),
+        asyncEnq(now, {a: 'a'}),
+        asyncEnq(now + 100, {b: 'b'}),
+        asyncEnq(now + 1000, {c: 'c'}),
       ], function(err, results) {
         queue.clear(function(err, count) {
           expect(count).to.equal(3);
