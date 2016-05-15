@@ -30,14 +30,14 @@ function middleware(req, res, next) {
 function longterm(what, when, data, callback) {
   if (!queue) queue = new MemoryQueue();
   if (!listenerMap[what] || !listenerMap[what].length) {
-    fireError('event ' + what + ' has no handlers. Make sure you define event handlers!');
+    callback('event ' + what + ' has no handlers. Make sure you define event handlers!');
   }
   queue.enqueue(when, {what: what, data: data}, function(err, event) {
     if (err) {
       if (typeof callback === 'function') callback(err);
       return;
     }
-    if (!timer || event.when <= timer.event.when) {
+    if (isSoonerThanTimer(event)) {
       setTimer(event);
     }
     if (typeof callback === 'function') callback(null, event.id);
@@ -77,10 +77,14 @@ function onTimerDone(event) {
 function findNextEvent() {
   queue.peek(function(err, next) {
     if (err) return fireError(err);
-    if (next) {
+    if (next && isSoonerThanTimer(next)) {
       setTimer(next);
     }
   });
+}
+
+function isSoonerThanTimer(event) {
+  return !timer || event.when < timer.event.when;
 }
 
 // sets the timer to wait for the given event
@@ -111,8 +115,9 @@ function initializeOptions(options) {
       console.log('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
     }
     var MemoryQueue = require('./MemoryQueue');
-    queue = options.queue = new MemoryQueue();
+    options.queue = new MemoryQueue();
   }
+  queue = options.queue;
   // find all the functions in the 'on' variable, and apply them with the 'on' function
   if (options.on) {
     for (var what in options.on) {
@@ -131,11 +136,13 @@ function initializeOptions(options) {
   } else if (typeof options.error === 'function') {
     error(options.error);
   }
+  findNextEvent();
   return options;
 }
 
 // set up the variables for ease of use in the api
 // allow chaining:   require('longterm').on(what, funk).error(funk)
+longterm.cancel = middleware.cancel = cancel;
 longterm.on = middleware.on = on;
 longterm.error = middleware.error = error;
 longterm.init = init;
