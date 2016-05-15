@@ -29,6 +29,9 @@ function middleware(req, res, next) {
 
 function longterm(what, when, data, callback) {
   if (!queue) queue = new MemoryQueue();
+  if (!listenerMap.what || !listenerMap.what.length) {
+    fireError('event ' + what + ' has no handlers. Make sure you define event handlers!');
+  }
   queue.enqueue(when, {what: what, data: data}, function(err, event) {
     if (err) {
       if (typeof callback === 'function') callback(err);
@@ -63,7 +66,7 @@ function onTimerDone(event) {
       process.nextTick(listeners[i], event.data.data);
     }
   } else {
-    fireError('event ' + event.data.what + ' has no handlers. Make sure you define event handlers before longterm init!');
+    fireError('event ' + event.data.what + ' has no handlers. Make sure you define event handlers!');
   }
   queue.remove(event.id, function(err, removed) {
     if (err) return fireError(err);
