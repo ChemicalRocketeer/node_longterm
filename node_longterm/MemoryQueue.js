@@ -67,7 +67,7 @@ proto.clear = function(callback) {
 
 proto._find = function(id) {
   for (var i = 0; i < this._events.length; i++) {
-    if (this._events[i].id === id) return i;
+    if (this._events[i].id == id) return i;
   }
   return -1;
 };
