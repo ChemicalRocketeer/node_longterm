@@ -62,6 +62,8 @@ function onTimerDone(event) {
     for (var i = 0; i < listeners.length; i++) {
       process.nextTick(listeners[i], event.data.data);
     }
+  } else {
+    fireError('event ' + event.data.what + ' has no handlers. Make sure you define event handlers before longterm init!');
   }
   queue.remove(event.id, function(err, removed) {
     if (err) return fireError(err);
