@@ -48,10 +48,12 @@ function longterm(what, when, data, callback) {
 function cancel(eventId, callback) {
   if (!queue) queue = new MemoryQueue();
   queue.remove(eventId.toString(), function(err, count) {
-    if (err) return fireError(err);
-    if (timer && timer.event.id == eventId) {
-      findNextEvent();
+    if (err) {
+      if (typeof callback === 'function') callback(err);
+      return;
     }
+    if (timer && timer.event.id == eventId) findNextEvent();
+    if (typeof callback === 'function') callback();
   });
 }
 
