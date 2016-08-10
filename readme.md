@@ -24,7 +24,7 @@ longterm('party', Date.now() + 10000, {
 ```
 
 ### init
-Before scheduling events, you will want to set up longterm with the init function. This will let you choose the type of data store you want to use, among other options.
+Before scheduling events, you will want to set up longterm with the init function. This will let you choose the data store you want to use, among other options.
 
 ```
 longterm.init({

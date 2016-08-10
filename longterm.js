@@ -10,8 +10,12 @@ function init(options) {
 
 function on(what, funk) {
   if (typeof what === 'string' && typeof funk === 'function') {
-    listenerMap[what] = listenerMap[what] || [];
-    listenerMap[what].push(funk);
+    if (what === 'error') {
+      errorHandlers.push(funk);
+    } else {
+      listenerMap[what] = listenerMap[what] || [];
+      listenerMap[what].push(funk);
+    }
   }
   // allow chaining:   require('longterm').on(what, funk).on(what, funk)
   return middleware;
