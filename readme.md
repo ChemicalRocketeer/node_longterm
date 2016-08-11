@@ -13,6 +13,7 @@ The primary export of longterm.js is the longterm function, which allows you to 
 
 ```
 var longterm = require('longterm');
+
 longterm('party', Date.now() + 10000, {
   inviteList: [
     'Aaron',
@@ -28,20 +29,44 @@ Before scheduling events, you will want to set up longterm with the init functio
 
 ```
 longterm.init({
-  queue: queueType,
-  on: { eventName: function, otherEvent: function, ... },
-  error: function|[function]
+  queue: new MongoQueue()
 })
 ```
-(all options are, as the name implies, optional)
+
+### event binding
+To handle events, use longterm's `on` function.
+
+```
+longterm.on('party', function(data) {
+  for (guest in data.inviteList) {
+    console.log('Welcome to the party, ' + guest + '!');
+  }
+})
+```
+
+You may want to set up an error handler. If you don't specify one, errors will be printed to `console.error`.
+
+```
+longterm.on('error', function(err) {
+  handle(err);
+})
+```
 
 
 ### middleware
-The init function doesn't just set up your options. It also returns middleware which can be used with Express.
+The init function doesn't just set up your options. It also returns middleware which can be used with Express. The middleware is attached to
 ```
 var app = require('express')();
 var longterm = require('longterm');
-app.use(longterm.init());
+
+var middleware = longterm.init();
+app.use(middleware);
+
+app.use('/', function(req, res) {
+  res.longterm('party', Date.now(), {
+    ['Just Me']
+  });
+});
 ```
 
 ### For more examples in an actual app environment, check out the demo directory.
