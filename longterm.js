@@ -116,7 +116,7 @@ function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
   if (!options.queue) {
     if (process.env.NODE_ENV === 'production') {
-      console.log('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
+      console.warn('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
     }
     var MemoryQueue = require('./MemoryQueue');
     options.queue = new MemoryQueue();
