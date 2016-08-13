@@ -1,28 +1,11 @@
+const EventEmitter = require('events');
+
 var queue;
 var timer;
-var listenerMap = {};
-var errorHandlers = [];
+var emit;
 
 function init(options) {
   initializeOptions(options);
-  return middleware;
-}
-
-function on(what, funk) {
-  if (typeof what === 'string' && typeof funk === 'function') {
-    if (what === 'error') {
-      errorHandlers.push(funk);
-    } else {
-      listenerMap[what] = listenerMap[what] || [];
-      listenerMap[what].push(funk);
-    }
-  }
-  // allow chaining:   require('longterm').on(what, funk).on(what, funk)
-  return middleware;
-}
-
-function error(funk) {
-  if (typeof funk === 'function') errorHandlers.push(funk);
   return middleware;
 }
 
@@ -49,6 +32,18 @@ function longterm(what, when, data, callback) {
   return longterm;
 }
 
+// make the longterm function inherit from EventEmitter
+(function extend(child, parent) {
+  for (var thing in parent) {
+    if (parent.hasOwnProperty(thing)) {
+      child[thing] = parent[thing];
+    }
+  }
+})(longterm, EventEmitter.prototype)
+EventEmitter.call(longterm);
+emit = longterm.emit;
+delete longterm.emit;
+
 function cancel(eventId, callback) {
   if (!queue) queue = new MemoryQueue();
   queue.remove(eventId.toString(), function(err, count) {
@@ -64,14 +59,7 @@ function cancel(eventId, callback) {
 // trigger the event and look for the next one
 function onTimerDone(event) {
   timer = null;
-  var listeners = listenerMap[event.data.what];
-  if (listeners) {
-    for (var i = 0; i < listeners.length; i++) {
-      process.nextTick(listeners[i], event.data.data);
-    }
-  } else {
-    fireError('event ' + event.data.what + ' has no handlers. Make sure you define event handlers!');
-  }
+  emit.call(longterm, event.data.what, event.data.data);
   queue.remove(event.id, function(err, removed) {
     if (err) return fireError(err);
     findNextEvent();
@@ -103,15 +91,6 @@ function setTimer(event) {
   };
 }
 
-function fireError(err) {
-  if (errorHandlers.length === 0) {
-    process.nextTick(console.error, err);
-  }
-  for (var i = 0; i < errorHandlers.length; i++) {
-    process.nextTick(errorHandlers[i], err);
-  }
-}
-
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
   if (!options.queue) {
@@ -126,19 +105,9 @@ function initializeOptions(options) {
   if (options.on) {
     for (var what in options.on) {
       if (options.on.hasOwnProperty(what)) {
-        on(what, options.on[what]);
+        longterm.on(what, options.on[what]);
       }
     }
-  }
-  if (Array.isArray(options.error)) {
-    for (var i = 0; i < options.error.length; i++) {
-      var handler = options.error[i];
-      if (typeof handler === 'function') {
-        error(handler);
-      }
-    }
-  } else if (typeof options.error === 'function') {
-    error(options.error);
   }
   findNextEvent();
   return options;
@@ -147,8 +116,6 @@ function initializeOptions(options) {
 // set up the variables for ease of use in the api
 // allow chaining:   require('longterm').on(what, funk).error(funk)
 longterm.cancel = middleware.cancel = cancel;
-longterm.on = middleware.on = on;
-longterm.error = middleware.error = error;
 longterm.init = init;
 
 module.exports = longterm;
