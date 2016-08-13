@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const MemoryQueue = require('./MemoryQueue');
 
 var queue;
 var timer;
@@ -34,17 +35,12 @@ function longterm(what, when, data, callback) {
 
 // make the longterm function inherit from EventEmitter
 function bindEventEmitter() {
-  emitter = new EventEmitter();
+  extend(EventEmitter.prototype, longterm);
+  EventEmitter.call(longterm);
   // ensure only we can emit the events
-  emit = emitter.emit;
-  delete emitter.emit;
-  // attach all the non-emit events to longterm
-  for (var thing in emitter) {
-    longterm[thing] = emitter[thing];
-  }
+  emit = longterm.emit;
+  delete longterm.emit;
 }
-
-bindEventEmitter();
 
 function cancel(eventId, callback) {
   if (!queue) queue = new MemoryQueue();
@@ -56,6 +52,13 @@ function cancel(eventId, callback) {
     if (timer && timer.event.id == eventId) findNextEvent();
     if (typeof callback === 'function') callback();
   });
+}
+
+function clear(callback) {
+  if (!queue) return process.nextTick(callback);
+  queue.clear(function(err, count) {
+    process.nextTick(callback, err, count);
+  })
 }
 
 // trigger the event and look for the next one
@@ -101,7 +104,6 @@ function initializeOptions(options) {
     if (process.env.NODE_ENV === 'production') {
       console.warn('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
     }
-    var MemoryQueue = require('./MemoryQueue');
     options.queue = new MemoryQueue();
   }
   queue = options.queue;
@@ -117,9 +119,16 @@ function initializeOptions(options) {
   return options;
 }
 
-// set up the variables for ease of use in the api
-// allow chaining:   require('longterm').on(what, funk).error(funk)
-longterm.cancel = middleware.cancel = cancel;
+function extend(parent, child) {
+  for (var thing in parent) {
+    child[thing] = parent[thing];
+  }
+}
+
+bindEventEmitter();
+longterm.cancel = cancel;
+longterm.clear = clear;
+extend(longterm, middleware);
 longterm.init = init;
 
 module.exports = longterm;
