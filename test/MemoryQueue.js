@@ -14,9 +14,8 @@ describe('MemoryQueue', function() {
   }
 
   describe('enqueue', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       queue = new MemoryQueue();
-      done();
     });
 
     it('should return the event information', function(done) {
@@ -31,9 +30,8 @@ describe('MemoryQueue', function() {
   })
 
   describe('peek', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       queue = new MemoryQueue();
-      done();
     });
 
     var asyncPeek = function(expected, remove) {
@@ -88,9 +86,8 @@ describe('MemoryQueue', function() {
   });
 
   describe('update', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       queue = new MemoryQueue();
-      done();
     });
 
     it('should change the event persistently', function(done) {
@@ -126,9 +123,8 @@ describe('MemoryQueue', function() {
   });
 
   describe('remove', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       queue = new MemoryQueue();
-      done();
     });
 
     it('should remove the correct item', function(done){
@@ -176,9 +172,8 @@ describe('MemoryQueue', function() {
   });
 
   describe('find', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       queue = new MemoryQueue();
-      done();
     });
 
     it('should find the correct item', function(done){
@@ -215,9 +210,8 @@ describe('MemoryQueue', function() {
   });
 
   describe('count', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       queue = new MemoryQueue();
-      done();
     });
 
     it('should return the correct number', function(done) {
@@ -243,9 +237,8 @@ describe('MemoryQueue', function() {
   });
 
   describe('clear', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       queue = new MemoryQueue();
-      done();
     });
 
     it('should clear the queue', function(done) {
