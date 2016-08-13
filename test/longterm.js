@@ -24,4 +24,31 @@ describe('longterm', function() {
     })
     longterm('test', Date.now());
   })
+
+  it('should be chainable', function(done) {
+    var keys = ['on', 'cancel', 'clear', 'middleware', 'init'];
+    expect(longterm.on('a', function() {})).to.contain.all.keys(keys)
+    longterm.on('test', function() {
+      expect(this).to.contain.all.keys(keys);
+      expect(this.on('b', function() {})).to.contain.all.keys(keys)
+      done();
+    })
+    longterm('test', Date.now())
+  })
+
+  it('should throw an error scheduling if there is no handler', function(done) {
+    longterm('test', Date.now(), null, function(err) {
+      expect(err).to.exist;
+      done();
+    })
+  })
+
+  it('should allow setting listeners after scheduling events', function(done) {
+    longterm('test', Date.now(), null, function(err) {
+      expect(err).to.not.exist;
+    })
+    longterm.on('test', function() {
+      done();
+    })
+  })
 });
