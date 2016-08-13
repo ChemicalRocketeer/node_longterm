@@ -19,7 +19,8 @@ function longterm(what, when, data, callback) {
   if (!queue) queue = new MemoryQueue();
   process.nextTick(function() {
     if (!longterm.listeners(what) || !longterm.listeners(what).length) {
-      callback('event ' + what + ' has no handlers. Make sure you define event handlers!');
+      if (typeof callback === 'function') callback(new Error('event ' + what + ' has no handlers. Make sure you define event handlers!'));
+      return;
     }
     queue.enqueue(when, {what: what, data: data}, function(err, event) {
       if (err) {
