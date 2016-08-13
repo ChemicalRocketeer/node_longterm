@@ -16,7 +16,7 @@ function middleware(req, res, next) {
 
 function longterm(what, when, data, callback) {
   if (!queue) queue = new MemoryQueue();
-  if (!listenerMap[what] || !listenerMap[what].length) {
+  if (!longterm.listeners(what) || !longterm.listeners(what).length) {
     callback('event ' + what + ' has no handlers. Make sure you define event handlers!');
   }
   queue.enqueue(when, {what: what, data: data}, function(err, event) {
@@ -33,16 +33,21 @@ function longterm(what, when, data, callback) {
 }
 
 // make the longterm function inherit from EventEmitter
-(function extend(child, parent) {
-  for (var thing in parent) {
-    if (parent.hasOwnProperty(thing)) {
-      child[thing] = parent[thing];
+function bindEventEmitter() {
+  (function extend(child, parent) {
+    for (var thing in parent) {
+      if (parent.hasOwnProperty(thing)) {
+        child[thing] = parent[thing];
+      }
     }
-  }
-})(longterm, EventEmitter.prototype)
-EventEmitter.call(longterm);
-emit = longterm.emit;
-delete longterm.emit;
+  })(longterm, EventEmitter.prototype)
+  EventEmitter.call(longterm);
+  // ensure only we can emit the events
+  emit = longterm.emit;
+  delete longterm.emit;
+}
+
+bindEventEmitter();
 
 function cancel(eventId, callback) {
   if (!queue) queue = new MemoryQueue();
@@ -93,6 +98,8 @@ function setTimer(event) {
 
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
+
+  bindEventEmitter();
   if (!options.queue) {
     if (process.env.NODE_ENV === 'production') {
       console.warn('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
