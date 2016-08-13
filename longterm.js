@@ -28,6 +28,7 @@ function longterm(what, when, data, callback) {
 
 // make the longterm function inherit from EventEmitter
 function bindEventEmitter() {
+  longterm.prototype = {};
   function extend(child, parent) {
     for (var thing in parent) {
       if (parent.hasOwnProperty(thing)) {
@@ -35,7 +36,8 @@ function bindEventEmitter() {
       }
     }
   }
-  extend(longterm, EventEmitter.prototype)
+  extend(longterm.prototype, Function.prototype);
+  extend(longterm.prototype, EventEmitter.prototype);
   EventEmitter.call(longterm);
   // ensure only we can emit the events
   emit = longterm.emit;
