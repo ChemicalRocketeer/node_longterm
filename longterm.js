@@ -16,21 +16,25 @@ function middleware(req, res, next) {
 }
 
 function longterm(what, when, data, callback) {
+  if (!callback && typeof data === 'function') {
+    callback = data;
+    data = null;
+  }
   if (!queue) queue = new MemoryQueue();
   process.nextTick(function() {
     if (!longterm.listeners(what) || !longterm.listeners(what).length) {
-      if (typeof callback === 'function') callback(new Error('event ' + what + ' has no handlers. Make sure you define event handlers!'));
+      if (callback) callback(new Error('event ' + what + ' has no handlers. Make sure you define event handlers!'));
       return;
     }
     queue.enqueue(when, {what: what, data: data}, function(err, event) {
       if (err) {
-        if (typeof callback === 'function') callback(err);
+        if (callback) callback(err);
         return;
       }
       if (isSoonerThanTimer(event)) {
         setTimer(event);
       }
-      if (typeof callback === 'function') callback(null, event.id);
+      if (callback) callback(null, event.id);
     });
   })
   return longterm;
@@ -41,9 +45,12 @@ function cancel(eventId, callback) {
     process.nextTick(callback);
   } else {
     queue.remove(eventId.toString(), function(err, count) {
-      if (err) return process.nextTick(callback, err);
+      if (err) {
+        if (callback) process.nextTick(callback, err);
+        return;
+      }
       if (timer && timer.event.id == eventId) findNextEvent();
-      process.nextTick(callback);
+      if (callback) process.nextTick(callback);
     });
   }
   return longterm;
@@ -54,7 +61,7 @@ function clear(callback) {
     process.nextTick(callback);
   } else {
     queue.clear(function(err, count) {
-      process.nextTick(callback, err, count);
+      if (callback) process.nextTick(callback, err, count);
     })
   }
   return longterm;
