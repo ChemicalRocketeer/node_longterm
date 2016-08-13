@@ -7,6 +7,7 @@ describe('longterm', function() {
 
   beforeEach(function(done) {
     longterm.clear(function() {
+      longterm.removeAllListeners();
       longterm.init();
       done();
     });
