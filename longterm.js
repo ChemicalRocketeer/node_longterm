@@ -17,48 +17,46 @@ function middleware(req, res, next) {
 
 function longterm(what, when, data, callback) {
   if (!queue) queue = new MemoryQueue();
-  if (!longterm.listeners(what) || !longterm.listeners(what).length) {
-    callback('event ' + what + ' has no handlers. Make sure you define event handlers!');
-  }
-  queue.enqueue(when, {what: what, data: data}, function(err, event) {
-    if (err) {
-      if (typeof callback === 'function') callback(err);
-      return;
+  process.nextTick(function() {
+    if (!longterm.listeners(what) || !longterm.listeners(what).length) {
+      callback('event ' + what + ' has no handlers. Make sure you define event handlers!');
     }
-    if (isSoonerThanTimer(event)) {
-      setTimer(event);
-    }
-    if (typeof callback === 'function') callback(null, event.id);
-  });
+    queue.enqueue(when, {what: what, data: data}, function(err, event) {
+      if (err) {
+        if (typeof callback === 'function') callback(err);
+        return;
+      }
+      if (isSoonerThanTimer(event)) {
+        setTimer(event);
+      }
+      if (typeof callback === 'function') callback(null, event.id);
+    });
+  })
   return longterm;
 }
 
-// make the longterm function inherit from EventEmitter
-function bindEventEmitter() {
-  extend(EventEmitter.prototype, longterm);
-  EventEmitter.call(longterm);
-  // ensure only we can emit the events
-  emit = longterm.emit;
-  delete longterm.emit;
-}
-
 function cancel(eventId, callback) {
-  if (!queue) queue = new MemoryQueue();
-  queue.remove(eventId.toString(), function(err, count) {
-    if (err) {
-      if (typeof callback === 'function') callback(err);
-      return;
-    }
-    if (timer && timer.event.id == eventId) findNextEvent();
-    if (typeof callback === 'function') callback();
-  });
+  if (!queue) {
+    process.nextTick(callback);
+  } else {
+    queue.remove(eventId.toString(), function(err, count) {
+      if (err) return process.nextTick(callback, err);
+      if (timer && timer.event.id == eventId) findNextEvent();
+      process.nextTick(callback);
+    });
+  }
+  return longterm;
 }
 
 function clear(callback) {
-  if (!queue) return process.nextTick(callback);
-  queue.clear(function(err, count) {
-    process.nextTick(callback, err, count);
-  })
+  if (!queue) {
+    process.nextTick(callback);
+  } else {
+    queue.clear(function(err, count) {
+      process.nextTick(callback, err, count);
+    })
+  }
+  return longterm;
 }
 
 // trigger the event and look for the next one
@@ -119,6 +117,15 @@ function initializeOptions(options) {
   return options;
 }
 
+// make the longterm function inherit from EventEmitter
+function bindEventEmitter() {
+  extend(EventEmitter.prototype, longterm);
+  EventEmitter.call(longterm);
+  // ensure only we can emit the events
+  emit = longterm.emit;
+  delete longterm.emit;
+}
+
 function extend(parent, child) {
   for (var thing in parent) {
     child[thing] = parent[thing];
@@ -129,6 +136,7 @@ bindEventEmitter();
 longterm.cancel = cancel;
 longterm.clear = clear;
 extend(longterm, middleware);
+longterm.middleware = middleware;
 longterm.init = init;
 
 module.exports = longterm;
