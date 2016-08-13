@@ -6,6 +6,12 @@ var emit;
 
 function init(options) {
   initializeOptions(options);
+  return middleware;
+}
+
+function middleware(req, res, next) {
+  res.longterm = longterm;
+  next();
 }
 
 function longterm(what, when, data, callback) {
@@ -96,6 +102,7 @@ function setTimer(event) {
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
 
+  bindEventEmitter();
   if (!options.queue) {
     if (process.env.NODE_ENV === 'production') {
       console.warn('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
@@ -116,7 +123,9 @@ function initializeOptions(options) {
   return options;
 }
 
-longterm.cancel = cancel;
+// set up the variables for ease of use in the api
+// allow chaining:   require('longterm').on(what, funk).error(funk)
+longterm.cancel = middleware.cancel = cancel;
 longterm.init = init;
 
 module.exports = longterm;
