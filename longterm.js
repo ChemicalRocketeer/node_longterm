@@ -6,12 +6,6 @@ var emit;
 
 function init(options) {
   initializeOptions(options);
-  return middleware;
-}
-
-function middleware(req, res, next) {
-  res.longterm = longterm;
-  next();
 }
 
 function longterm(what, when, data, callback) {
@@ -34,13 +28,14 @@ function longterm(what, when, data, callback) {
 
 // make the longterm function inherit from EventEmitter
 function bindEventEmitter() {
-  (function extend(child, parent) {
+  function extend(child, parent) {
     for (var thing in parent) {
       if (parent.hasOwnProperty(thing)) {
         child[thing] = parent[thing];
       }
     }
-  })(longterm, EventEmitter.prototype)
+  }
+  extend(longterm, EventEmitter.prototype)
   EventEmitter.call(longterm);
   // ensure only we can emit the events
   emit = longterm.emit;
@@ -99,7 +94,6 @@ function setTimer(event) {
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
 
-  bindEventEmitter();
   if (!options.queue) {
     if (process.env.NODE_ENV === 'production') {
       console.warn('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
@@ -120,9 +114,7 @@ function initializeOptions(options) {
   return options;
 }
 
-// set up the variables for ease of use in the api
-// allow chaining:   require('longterm').on(what, funk).error(funk)
-longterm.cancel = middleware.cancel = cancel;
+longterm.cancel = cancel;
 longterm.init = init;
 
 module.exports = longterm;
