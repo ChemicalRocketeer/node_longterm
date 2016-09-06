@@ -1,7 +1,7 @@
 {
   "name": "longterm",
   "version": "1.0.0",
-  "description": "A tool to schedule arbitrary events dynamically and persistently across multiple instances and restarts",
+  "description": "A tool to schedule events persistently across multiple app restarts",
   "main": "longterm.js",
   "scripts": {
     "test": "mocha"

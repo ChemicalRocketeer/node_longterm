@@ -1,7 +1,6 @@
 # longterm.js
-This package is still in development! There is not adequate testing, and some features have not been built yet!
 
-Longterm is a tool to schedule arbitrary events dynamically and persistently across multiple instances and restarts. It is designed to handle a large volume of events and to allow great flexibility in its use.
+Longterm is a zero-dependency tool to schedule events persistently across multiple app restarts. It is designed to handle a large volume of events and to allow great flexibility in its use.
 
 ## The API
 Define your event types and response functions on app startup, and then you can schedule events whenever you want.
