@@ -1,6 +1,6 @@
 {
   "name": "longterm",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A tool to schedule arbitrary events dynamically and persistently across multiple instances and restarts",
   "main": "longterm.js",
   "scripts": {
