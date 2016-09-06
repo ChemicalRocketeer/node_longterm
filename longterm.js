@@ -1,16 +1,16 @@
 const EventEmitter = require('events');
 const MemoryQueue = require('./MemoryQueue');
 
+var longterm;
 var queue;
 var timer;
-var emit;
 
 function init(options) {
   initializeOptions(options);
   return longterm;
 }
 
-function longterm(what, when, data, callback) {
+function schedule(what, when, data, callback) {
   if (!callback && typeof data === 'function') {
     callback = data;
     data = null;
@@ -65,7 +65,7 @@ function clear(callback) {
 // trigger the event and look for the next one
 function onTimerDone(event) {
   timer = null;
-  emit.call(longterm, event.data.what, event.data.data);
+  longterm.emit(event.data.what, event.data.data);
   queue.remove(event.id, function(err, removed) {
     if (err) return fireError(err);
     findNextEvent();
@@ -100,7 +100,6 @@ function setTimer(event) {
 function initializeOptions(options) {
   if (typeof options !== 'object' || options === null) options = {};
 
-  bindEventEmitter();
   if (!options.queue) {
     if (process.env.NODE_ENV === 'production') {
       console.warn('longterm.js: MemoryQueue should not be used in a production environment. Use a database queue like MongoQueue instead.');
@@ -108,6 +107,7 @@ function initializeOptions(options) {
     options.queue = new MemoryQueue();
   }
   queue = options.queue;
+
   // find all the functions in the 'on' variable, and apply them with the 'on' function
   if (options.on) {
     for (var what in options.on) {
@@ -116,23 +116,18 @@ function initializeOptions(options) {
       }
     }
   }
+
   findNextEvent();
   return options;
 }
 
 // make the longterm function inherit from EventEmitter
 function bindEventEmitter() {
-  extend(EventEmitter.prototype, longterm);
-  EventEmitter.call(longterm);
-}
-
-function extend(parent, child) {
-  for (var thing in parent) {
-    child[thing] = parent[thing];
-  }
+  longterm = new EventEmitter();
 }
 
 bindEventEmitter();
+longterm.schedule = schedule;
 longterm.cancel = cancel;
 longterm.clear = clear;
 longterm.init = init;
