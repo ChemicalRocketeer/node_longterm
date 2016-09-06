@@ -1,16 +1,16 @@
 const EventEmitter = require('events');
 const MemoryQueue = require('./MemoryQueue');
 
-var longterm;
 var queue;
 var timer;
+var longterm = module.exports = new EventEmitter();
 
-function init(options) {
+longterm.init = function init(options) {
   initializeOptions(options);
   return longterm;
 }
 
-function schedule(what, when, data, callback) {
+longterm.schedule = function schedule(what, when, data, callback) {
   if (!callback && typeof data === 'function') {
     callback = data;
     data = null;
@@ -35,7 +35,7 @@ function schedule(what, when, data, callback) {
   return longterm;
 }
 
-function cancel(eventId, callback) {
+longterm.cancel = function cancel(eventId, callback) {
   if (!queue) {
     process.nextTick(callback);
   } else {
@@ -51,7 +51,7 @@ function cancel(eventId, callback) {
   return longterm;
 }
 
-function clear(callback) {
+longterm.clear = function clear(callback) {
   if (!queue) {
     process.nextTick(callback);
   } else {
@@ -120,16 +120,3 @@ function initializeOptions(options) {
   findNextEvent();
   return options;
 }
-
-// make the longterm function inherit from EventEmitter
-function bindEventEmitter() {
-  longterm = new EventEmitter();
-}
-
-bindEventEmitter();
-longterm.schedule = schedule;
-longterm.cancel = cancel;
-longterm.clear = clear;
-longterm.init = init;
-
-module.exports = longterm;
