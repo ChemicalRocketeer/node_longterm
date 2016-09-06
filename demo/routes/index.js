@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var longterm = require('../../longterm');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -7,8 +8,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/longterm', function(req, res, next) {
-  res.longterm('test', Date.now() + 5000, { message: 'hello longterm!' }, function(err, eventId) {
-    res.send(eventId.toString());
+  longterm('test', Date.now() + 5000, { message: 'hello longterm!' }, function(err, eventId) {
+    res.send('scheduled event #' + eventId + ' for 5 seconds from now');
   });
 });
 
