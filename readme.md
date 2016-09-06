@@ -9,7 +9,7 @@ Define your event types and response functions on app startup, and then you can 
 ### init
 Before scheduling events, you will want to set up longterm with the init function. This will let you choose the data store you want to use, among other options.
 
-```
+```js
 longterm.init({
   queue: new MongoQueue()
 })
@@ -20,7 +20,7 @@ The primary export of longterm.js is the longterm function, which allows you to 
 
 `longterm.schedule(what, when, data[, callback])`
 
-```
+```js
 var longterm = require('longterm');
 
 longterm.schedule('party', Date.now() + 10000, {
@@ -36,7 +36,7 @@ longterm.schedule('party', Date.now() + 10000, {
 ### event binding
 To handle events, use longterm's `on` function.
 
-```
+```js
 longterm.on('party', function(data) {
   for (guest in data.inviteList) {
     console.log('Welcome to the party, ' + guest + '!');
@@ -46,7 +46,7 @@ longterm.on('party', function(data) {
 
 You may want to set up an error handler. If you don't specify one, errors will be printed to `console.error`.
 
-```
+```js
 longterm.on('error', function(err) {
   handle(err);
 })
