@@ -5,7 +5,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var longterm = require('../longterm');
+var longterm = require('longterm');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(longterm.init());
+longterm.init();
 
 longterm.on('test', function(event) {
   console.log(event.message);
