@@ -7,12 +7,7 @@ var emit;
 
 function init(options) {
   initializeOptions(options);
-  return middleware;
-}
-
-function middleware(req, res, next) {
-  res.longterm = longterm;
-  next();
+  return longterm;
 }
 
 function longterm(what, when, data, callback) {
@@ -143,8 +138,6 @@ function extend(parent, child) {
 bindEventEmitter();
 longterm.cancel = cancel;
 longterm.clear = clear;
-extend(longterm, middleware);
-longterm.middleware = middleware;
 longterm.init = init;
 
 module.exports = longterm;
