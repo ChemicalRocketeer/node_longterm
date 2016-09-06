@@ -6,23 +6,20 @@ Longterm is a tool to schedule arbitrary events dynamically and persistently acr
 ## The API
 Define your event types and response functions on app startup, and then you can schedule events whenever you want.
 
-### init
+### init(options)
 Before scheduling events, you will want to set up longterm with the init function. This will let you choose the data store you want to use, among other options.
 
 ```js
+var longterm = require('longterm')
 longterm.init({
   queue: new MongoQueue()
 })
 ```
 
-### schedule
+### schedule(what, when, data[, callback])
 The primary export of longterm.js is the longterm function, which allows you to schedule events.
 
-`longterm.schedule(what, when, data[, callback])`
-
 ```js
-var longterm = require('longterm');
-
 longterm.schedule('party', Date.now() + 10000, {
   inviteList: [
     'Aaron',
@@ -33,8 +30,8 @@ longterm.schedule('party', Date.now() + 10000, {
 });
 ```
 
-### event binding
-To handle events, use longterm's `on` function.
+### Event Binding
+Longterm is an EventEmitter. To handle events, use `on(event, handler)`. The event handler will be passed as a parameter the data that was originally provided when the event was scheduled.
 
 ```js
 longterm.on('party', function(data) {
