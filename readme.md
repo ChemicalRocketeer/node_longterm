@@ -6,7 +6,7 @@ Longterm is a tool to schedule arbitrary events dynamically and persistently acr
 ## The API
 Define your event types and response functions on app startup, and then you can schedule events whenever you want.
 
-### init(options)
+### `init(options)`
 Before scheduling events, you will want to set up longterm with the init function. This will let you choose the data store you want to use, among other options.
 
 ```js
@@ -16,7 +16,7 @@ longterm.init({
 })
 ```
 
-### schedule(what, when, data[, callback])
+### `schedule(what, when, data[, callback])`
 The primary export of longterm.js is the longterm function, which allows you to schedule events.
 
 ```js
