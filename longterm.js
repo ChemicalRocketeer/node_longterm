@@ -124,9 +124,6 @@ function initializeOptions(options) {
 function bindEventEmitter() {
   extend(EventEmitter.prototype, longterm);
   EventEmitter.call(longterm);
-  // ensure only we can emit the events
-  emit = longterm.emit;
-  delete longterm.emit;
 }
 
 function extend(parent, child) {
