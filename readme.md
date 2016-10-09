@@ -3,7 +3,7 @@ Longterm is a zero-dependency tool to schedule events persistently across multip
 It is designed to handle a large volume of events and to allow great flexibility in its use.
 
 ## The API
-Define your event types and response functions on app startup, and then you can schedule events whenever you want.
+Define your event callbacks on app startup, and then you can schedule events whenever you want.
 
 ### init(`options`)
 Before scheduling events, you will want to set up longterm with the init function.
