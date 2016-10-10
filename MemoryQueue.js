@@ -24,7 +24,7 @@ proto.enqueue = function(when, data, callback) {
   this._events.sort(function(a, b) {
     return a.when - b.when;
   });
-  callback(null, event);
+  callback(null, event.id);
 };
 
 proto.update = function(id, data, callback) {

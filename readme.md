@@ -68,24 +68,25 @@ All the methods in this interface use callbacks but they aren't listed in the de
 To test your queue (with mocha), use [longterm-queue-test](https://www.npmjs.com/package/longterm-queue-test).
 All irrecoverable errors should be bubbled up to the callback.
 
+Any time the queue sends event objects to the callback, they should be of the form
+```js
+{
+  id: "string", // an id provided by the queue implementation
+  when: Date, // the scheduled time
+  data: { /* the data */ } // the event's data
+}
+```
+
 If you wrote a queue and you want it mentioned on this readme, please submit a pull request.
 
 #### peek()
 Fetches the soonest event (Earliest possible date) and supplies it to the callback. Sends `null` if there are no events queued.
 
 #### enqueue(`when`, `data`)
-Stores an event at time `when` (`when` is a Date object), containing `data`, and assigns it a unique string ID (You can store it as whatever you want internally, but front-facing it should be a string). Sends the scheduled object to the callback in the form:
-```js
-{
-  id: "string",
-  when: when, // unchanged
-  data: data // unchanged
-}
-```
-This is the form all scheduled events will take throughout the queue interface.
+Stores an event at time `when` (`when` is a Date object), containing `data`, and assigns it a unique string ID (You can store it as whatever you want internally, but front-facing it should be a string). Callback is sent either the full event object as specified above, or just the event id.
 
 #### update(`id`, `data`)
-Changes the data of the event with the given `id`. `data` will replace the event's previous data value. Sends the full event (with the updated `data`) to the callback in the form specified in `enqueue`. If the event does not exist in the queue, no changes are made and callback is invoked with `null`.
+Changes the data of the event with the given `id`. `data` will replace the event's previous data value. Sends the full event (with the updated `data`) to the callback. If the event does not exist in the queue, callback is invoked with `null`.
 
 #### remove(`id`)
 Removes the event with the given `id` entirely. Sends the number of events removed to the callback (should be 1), 0 if the event didn't exist.

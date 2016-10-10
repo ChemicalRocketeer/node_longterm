@@ -21,10 +21,21 @@ longterm.schedule = function schedule(what, when, data, callback) {
       if (callback) callback(new Error('event ' + what + ' has no handlers. Make sure you define event handlers!'));
       return;
     }
-    queue.enqueue(when, {what: what, data: data}, function(err, event) {
+    var data = {
+      what: what,
+      data: data
+    };
+    queue.enqueue(when, data, function(err, event) {
       if (err) {
         if (callback) callback(err);
         return;
+      }
+      if (typeof event === 'string') {
+        event = {
+          when: when,
+          data: data,
+          id: event
+        };
       }
       if (isSoonerThanTimer(event)) {
         setTimer(event);
